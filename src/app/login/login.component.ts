@@ -24,7 +24,7 @@ export class LoginComponent {
 
       // Your own backend login/signup
       const res = await this.http
-        .post<any>('http://localhost:3000/api/auth/google', {
+        .post<any>('https://sync-beat.onrender.com/api/auth/google', {
           name: displayName,
           email,
           googlePhotoUrl: photoURL,

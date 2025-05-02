@@ -36,7 +36,7 @@ export class RoomComponent implements OnInit {
 
       // Retrieve the room code from the URL params
       this.roomCode = this.route.snapshot.paramMap.get('code')!;
-      this.socket = io('http://localhost:3000');
+      this.socket = io('https://sync-beat.onrender.com');
       this.socket.emit('joinRoom', this.roomCode);
 
       // Listen for new chat messages
