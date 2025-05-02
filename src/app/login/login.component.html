@@ -1,0 +1,50 @@
+<div
+  class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 px-4 py-10"
+>
+  <div
+    class="bg-white rounded-3xl shadow-2xl p-8 sm:p-10 max-w-md w-full text-center"
+  >
+    <!-- Logo -->
+    <img
+      src="https://cdn-icons-png.flaticon.com/512/727/727218.png"
+      alt="Music Icon"
+      class="w-16 h-16 mx-auto mb-4 animate-pulse"
+    />
+
+    <!-- App Info -->
+    <h2 class="text-2xl sm:text-3xl font-extrabold text-purple-700 mb-3">
+      Login to SyncBeats
+    </h2>
+    <p class="text-gray-600 text-sm sm:text-base mb-6 px-2">
+      This app uses your <strong>Google Drive</strong> to store and play your
+      music. Connect with friends and vibe together — all in sync 🎧💜
+    </p>
+
+    <!-- Google Login -->
+    <!-- Google Login -->
+    <button
+      class="w-full bg-red-500 hover:bg-red-600 transition-all text-white font-bold py-3 px-6 rounded-full flex items-center justify-center gap-3 text-sm sm:text-base shadow-md"
+      (click)="handleGoogleClick()"
+    >
+      <img
+        src="https://cdn-icons-png.flaticon.com/512/281/281764.png"
+        alt="Google Icon"
+        class="w-5 h-5"
+      />
+      Sign in with Google
+    </button>
+
+    <!-- Logout Button -->
+    <!-- <button
+      class="w-full bg-gray-700 hover:bg-gray-800 transition-all text-white font-bold py-3 px-6 rounded-full flex items-center justify-center gap-3 text-sm sm:text-base shadow-md mt-4"
+      (click)="handleLogout()"
+    >
+      Logout ({{ userName }})
+    </button> -->
+
+    <!-- Optional Sign-up Notice -->
+    <p class="text-gray-500 text-sm mt-6">
+      Don’t have an account? Just hit Google — we’ll take care of the rest 🤝
+    </p>
+  </div>
+</div>

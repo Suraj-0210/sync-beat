@@ -1,0 +1,14 @@
+/* Custom styles for CreateRoomComponent can go here */
+.container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+button {
+  cursor: pointer;
+}
+
+hr {
+  border-top: 2px solid #eee;
+}

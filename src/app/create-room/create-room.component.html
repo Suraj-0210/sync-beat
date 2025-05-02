@@ -1,0 +1,52 @@
+<div class="max-w-lg mx-auto p-6 bg-white shadow-md rounded-lg">
+  <h2 class="text-2xl font-semibold text-center mb-4">Create Room</h2>
+
+  <!-- Form to create a room -->
+  <form (ngSubmit)="createRoom()" class="space-y-4">
+    <div class="flex flex-col">
+      <label for="roomName" class="text-lg font-medium">Room Name</label>
+      <input
+        type="text"
+        id="roomName"
+        [(ngModel)]="roomName"
+        name="roomName"
+        class="border border-gray-300 p-2 rounded-lg"
+        placeholder="Enter room name"
+        required
+      />
+    </div>
+
+    <button
+      type="submit"
+      class="w-full bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition duration-200"
+    >
+      Create Room
+    </button>
+  </form>
+
+  <hr class="my-6" />
+
+  <!-- Form to go to an existing room -->
+  <h3 class="text-xl font-semibold text-center mb-4">Go to Room</h3>
+  <form (ngSubmit)="goToRoom()" class="space-y-4">
+    <div class="flex flex-col">
+      <label for="roomCode" class="text-lg font-medium">Room Code</label>
+      <input
+        type="text"
+        id="roomCode"
+        [(ngModel)]="roomCode"
+        name="roomCode"
+        class="border border-gray-300 p-2 rounded-lg"
+        placeholder="Enter room code"
+        required
+      />
+    </div>
+
+    <button
+      type="submit"
+      class="w-full bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 transition duration-200"
+    >
+      Go to Room
+    </button>
+  </form>
+</div>
