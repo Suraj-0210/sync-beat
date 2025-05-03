@@ -33,7 +33,7 @@ export class LoginComponent {
 
       document.cookie = `access_token=${res.access_token}; path=/;`;
 
-      this.router.navigate(['/']);
+      this.router.navigate(['/create-room']);
     } catch (err: any) {
       console.error('Google login error:', err.message);
     }
