@@ -6,35 +6,58 @@
 
   <!-- Chat Area -->
   <div
+    #chatContainer
     class="h-80 overflow-y-auto px-4 py-3 bg-gray-50 rounded-lg shadow-inner border border-gray-200 mb-8 space-y-4"
   >
+    <!-- In-Chat Toast Notification -->
+    <div
+      *ngIf="toastMessage"
+      class="sticky top-0 z-20 mx-auto w-fit max-w-xs bg-indigo-600 text-white px-4 py-2 rounded-md shadow-md text-sm text-center animate-fadeIn"
+    >
+      💬 {{ toastMessage }}
+    </div>
+
+    <!-- Messages Loop -->
     <div
       *ngFor="let message of messages"
       class="flex items-start"
       [ngClass]="{
-        'justify-end flex-row-reverse': message.userName === userName
+        'justify-end': message.userName === userName,
+        'justify-start': message.userName !== userName
       }"
     >
-      <!-- Avatar -->
+      <!-- Message Wrapper -->
       <div
-        class="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-500 text-white flex items-center justify-center font-bold"
+        class="flex items-start"
+        [ngClass]="{
+          'flex-row-reverse space-x-reverse space-x-3':
+            message.userName === userName,
+          'space-x-3': message.userName !== userName
+        }"
       >
-        {{ message.userName[0] }}
-      </div>
-
-      <!-- Message Box -->
-      <div
-        class="ml-3 max-w-sm bg-white border border-gray-200 rounded-xl shadow px-4 py-2"
-      >
-        <div class="text-sm text-gray-700">
-          <span class="font-semibold text-indigo-600">{{
-            message.userName
-          }}</span
-          >:
-          {{ message.message }}
+        <!-- Avatar -->
+        <div
+          class="w-10 h-10 rounded-full bg-indigo-500 text-white flex items-center justify-center font-bold"
+        >
+          {{ message.userName[0] }}
         </div>
-        <div class="text-xs text-gray-400 text-right mt-1">
-          {{ message.time }}
+
+        <!-- Message Box -->
+        <div
+          class="max-w-sm bg-white border border-gray-200 rounded-xl shadow px-4 py-2"
+          [ngClass]="{
+            'bg-indigo-50 border-indigo-300': message.userName === userName
+          }"
+        >
+          <div class="text-sm text-gray-700">
+            <span class="font-semibold text-indigo-600">{{
+              message.userName
+            }}</span
+            >: {{ message.message }}
+          </div>
+          <div class="text-xs text-gray-400 text-right mt-1">
+            {{ message.time }}
+          </div>
         </div>
       </div>
     </div>

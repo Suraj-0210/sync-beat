@@ -1,4 +1,10 @@
-import { Component, NgZone, OnInit } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  NgZone,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { io } from 'socket.io-client';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
@@ -26,6 +32,15 @@ export class RoomComponent implements OnInit {
 
   private audioElement: HTMLAudioElement = new Audio(); // Audio element to control music
 
+  toastMessage: string | null = null;
+
+  showToast(message: string) {
+    this.toastMessage = message;
+    setTimeout(() => {
+      this.toastMessage = null;
+    }, 3000); // Hide after 3 seconds
+  }
+
   ngOnInit(): void {
     this.afAuth.authState.subscribe((user) => {
       if (user) {
@@ -43,6 +58,8 @@ export class RoomComponent implements OnInit {
       this.socket.on('chatMessage', (message: ChatMessage) => {
         this.ngZone.run(() => {
           this.messages.push(message);
+          setTimeout(() => this.scrollToBottom(), 100);
+          this.showToast('New Message!');
         });
       });
 
@@ -50,6 +67,8 @@ export class RoomComponent implements OnInit {
       this.socket.on('previousMessages', (messages: ChatMessage[]) => {
         this.ngZone.run(() => {
           this.messages = messages;
+          setTimeout(() => this.scrollToBottom(), 100);
+          this.showToast('Loaded Messages!');
         });
       });
 
@@ -73,6 +92,7 @@ export class RoomComponent implements OnInit {
                 .then(() => {
                   console.log('✅ Playback started');
                   this.isPlaying = true;
+                  this.showToast('Playing Song');
                 })
                 .catch((err) => {
                   console.error('❌ Audio play error:', err);
@@ -92,6 +112,15 @@ export class RoomComponent implements OnInit {
     });
   }
 
+  @ViewChild('chatContainer') chatContainer!: ElementRef;
+  private scrollToBottom(): void {
+    try {
+      this.chatContainer.nativeElement.scrollTop =
+        this.chatContainer.nativeElement.scrollHeight;
+    } catch (err) {
+      console.error('Scroll failed:', err);
+    }
+  }
   sendMessage() {
     if (this.newMessage.trim()) {
       const messageData = {
