@@ -92,30 +92,80 @@
     </button>
   </div>
 
-  <!-- Song Control Area -->
-  <div class="bg-gray-100 p-6 rounded-xl shadow-md">
-    <h3 class="text-lg font-semibold text-gray-700 mb-4 text-center">
-      🎧 Song Controls
-    </h3>
-    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-      <input
-        type="text"
-        [(ngModel)]="songUrl"
-        placeholder="Enter song URL"
-        class="flex-1 px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:ring-2 focus:ring-green-400 outline-none w-full"
-      />
+  <!-- Trigger Button -->
+  <button
+    (click)="openMusicModal()"
+    class="bg-indigo-600 text-white items-center justify-center px-4 py-2 rounded-xl shadow hover:bg-indigo-700"
+  >
+    🎶 Open Music Player
+  </button>
+
+  <!-- Music Modal -->
+  <div
+    *ngIf="showMusicModal"
+    class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-50 flex items-center justify-center"
+  >
+    <div
+      class="bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-auto p-6 relative"
+    >
+      <!-- Close Button -->
       <button
-        (click)="playSelectedSong(songUrl)"
-        class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-md transition shadow-md"
+        (click)="closeMusicModal()"
+        class="absolute top-4 right-4 text-gray-600 hover:text-red-500"
       >
-        ▶️ Play
+        ✖
       </button>
-      <button
-        (click)="pauseSelectedSong()"
-        class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-md transition shadow-md"
-      >
-        ⏸️ Pause
-      </button>
+
+      <!-- Modal Header -->
+      <h2 class="text-2xl font-semibold text-gray-800 text-center mb-6">
+        🎧 Music Player
+      </h2>
+
+      <!-- Song List Section -->
+      <div class="max-h-48 overflow-y-auto mb-6">
+        <ul class="divide-y divide-gray-200">
+          <li
+            *ngFor="let song of songs"
+            (click)="playSelectedSong(song.url)"
+            class="py-2 px-4 hover:bg-indigo-50 cursor-pointer rounded-md"
+          >
+            🎵 {{ song.name }}
+          </li>
+        </ul>
+      </div>
+
+      <!-- Audio Controls -->
+      <div class="space-y-4">
+        <div class="flex items-center gap-4">
+          <input
+            type="range"
+            min="0"
+            [max]="audioDuration"
+            [value]="currentTime"
+            (input)="seekAudio($event)"
+            class="w-full"
+          />
+          <span class="text-sm text-gray-600">
+            {{ formatTime(currentTime) }} / {{ formatTime(audioDuration) }}
+          </span>
+        </div>
+
+        <div class="flex justify-center gap-4">
+          <button
+            class="bg-green-600 text-white px-5 py-2 rounded-lg shadow hover:bg-green-700"
+          >
+            ▶️ Play
+          </button>
+          <button
+            (click)="pauseAudio()"
+            class="bg-red-600 text-white px-5 py-2 rounded-lg shadow hover:bg-red-700"
+          >
+            ⏸️ Pause
+          </button>
+        </div>
+      </div>
     </div>
   </div>
+  <!-- Hidden audio element -->
+  <audio #audio hidden (timeupdate)="onTimeUpdate($event)"></audio>
 </div>
