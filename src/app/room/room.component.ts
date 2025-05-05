@@ -154,8 +154,7 @@ export class RoomComponent implements OnInit {
   }
 
   resumeSong() {
-    // Emit to other users in the room
-    this.socket.emit('resumeSong', { roomCode: this.roomCode });
+    this.socket.emit('resumeSong', this.roomCode);
   }
 
   playAudio(data: any) {

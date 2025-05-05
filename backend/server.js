@@ -69,10 +69,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("resumeSong", ({ roomCode }) => {
-    socket.to(roomCode).emit("resumeSong"); // Broadcast to all others in the room
-  });
-
   socket.on("chatMessage", ({ roomCode, message, userName, time }) => {
     console.log("Message Received");
     if (!rooms[roomCode]) rooms[roomCode] = [];
@@ -103,6 +99,9 @@ io.on("connection", (socket) => {
       roomStates[roomCode].isPlaying = false;
     }
     io.to(roomCode).emit("pauseSong");
+  });
+  socket.on("resumeSong", (roomCode) => {
+    io.to(roomCode).emit("resumeSong");
   });
 
   socket.on("disconnect", () => {
