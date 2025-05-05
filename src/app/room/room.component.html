@@ -68,6 +68,7 @@
     <input
       type="text"
       [(ngModel)]="newMessage"
+      (keydown.enter)="sendMessage()"
       class="w-full px-4 py-3 rounded-xl border border-gray-300 shadow-sm placeholder-gray-500 focus:ring-2 focus:ring-indigo-400 outline-none"
       placeholder="Type your message..."
     />
