@@ -63,6 +63,13 @@ export class RoomComponent implements OnInit {
         });
       });
 
+      this.socket.on('resumeSong', () => {
+        const audio = this.audioRef.nativeElement;
+        if (audio.src) {
+          audio.play();
+        }
+      });
+
       // Listen for previous messages when a new user joins
       this.socket.on('previousMessages', (messages: ChatMessage[]) => {
         this.ngZone.run(() => {
@@ -144,6 +151,11 @@ export class RoomComponent implements OnInit {
 
   closeMusicModal() {
     this.showMusicModal = false;
+  }
+
+  resumeSong() {
+    // Emit to other users in the room
+    this.socket.emit('resumeSong', { roomCode: this.roomCode });
   }
 
   playAudio(data: any) {

@@ -69,6 +69,10 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("resumeSong", ({ roomCode }) => {
+    socket.to(roomCode).emit("resumeSong"); // Broadcast to all others in the room
+  });
+
   socket.on("chatMessage", ({ roomCode, message, userName, time }) => {
     console.log("Message Received");
     if (!rooms[roomCode]) rooms[roomCode] = [];
