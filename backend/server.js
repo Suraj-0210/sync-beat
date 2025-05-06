@@ -4,6 +4,8 @@ import { Server } from "socket.io";
 import cors from "cors";
 import mongoose from "mongoose";
 import authRoutes from "./routes/auth.route.js";
+import bodyParser from "body-parser";
+import axios from "axios";
 
 const app = express();
 const server = http.createServer(app);
@@ -30,6 +32,8 @@ const allowedOrigins = [
   "http://localhost:4200",
   "https://sync-beat.vercel.app",
 ];
+
+app.use(bodyParser.json());
 
 // Apply CORS to Express
 app.use(
@@ -107,6 +111,40 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("User disconnected");
   });
+});
+
+app.post("/api/download", async (req, res) => {
+  try {
+    const { song_name, artist_name, url } = req.body;
+    console.log(song_name + "Song ");
+    console.log(artist_name + "artist ");
+    console.log(url + "url ");
+
+    const response = await axios.post(
+      "https://spotisongdownloader.to/api/composer/spotify/ssdw23456ytrfds.php",
+      new URLSearchParams({
+        song_name,
+        artist_name,
+        url,
+      }),
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+          Cookie:
+            "PHPSESSID=ca2428fc47cea60e60d528942b923a54; cf_token=3f53cd2816289943541a9d726e9c93fa; quality=128",
+          Origin: "https://spotisongdownloader.to",
+          Referer: "https://spotisongdownloader.to/track.php",
+          "User-Agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5)",
+          "X-Requested-With": "XMLHttpRequest",
+        },
+      }
+    );
+
+    res.json(response.data);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: "Failed to fetch download link" });
+  }
 });
 
 server.listen(3000, () => {

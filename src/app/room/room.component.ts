@@ -9,6 +9,10 @@ import { ActivatedRoute } from '@angular/router';
 import { io } from 'socket.io-client';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 
+import axios from 'axios';
+import qs from 'qs';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+
 interface ChatMessage {
   userName: string;
   message: string;
@@ -142,7 +146,6 @@ export class RoomComponent implements OnInit {
       name: 'Premalo',
       url: 'https://firebasestorage.googleapis.com/v0/b/mern-blog-4cc1b.appspot.com/o/Premalo%20-%20Anurag%20kulkarni%20-%20Ameera%20lyrical%20video%20%23lyricalsong%20-%20Naidu%20lyrics.mp3?alt=media&token=89813859-8c81-4dda-9a94-dde20b3650df',
     },
-    { name: 'Synthwave Vibes', url: 'http://localhost:3000/another-song' },
   ];
 
   openMusicModal() {
@@ -221,9 +224,30 @@ export class RoomComponent implements OnInit {
     return `${min}:${sec}`;
   }
 
+  spotifyLink: string = ''; // Holds the Spotify link
+
+  downloadAndSaveTrack(spotifyLink: string): void {
+    this.http
+      .post<any>('http://localhost:3000/api/download', {
+        song_name: 'Sync-Beat',
+        artist_name: 'Hare Krishna',
+        url: spotifyLink,
+      })
+      .subscribe({
+        next: (data) => {
+          this.songUrl = data.dlink;
+          this.playSelectedSong(this.songUrl);
+        },
+        error: (err) => {
+          console.error('HTTP error:', err);
+        },
+      });
+  }
+
   constructor(
     private route: ActivatedRoute,
     private ngZone: NgZone,
-    private afAuth: AngularFireAuth
+    private afAuth: AngularFireAuth,
+    private http: HttpClient
   ) {}
 }

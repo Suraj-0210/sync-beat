@@ -138,6 +138,22 @@
         </ul>
       </div>
 
+      <!-- Spotify Link Input Section -->
+      <div class="flex items-center gap-4 mb-4">
+        <input
+          type="text"
+          [(ngModel)]="spotifyLink"
+          placeholder="Paste Spotify Link"
+          class="w-full px-4 py-3 rounded-xl border border-gray-300 shadow-sm placeholder-gray-500 focus:ring-2 focus:ring-indigo-400 outline-none"
+        />
+        <button
+          (click)="downloadAndSaveTrack(spotifyLink)"
+          class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-lg shadow-lg transition"
+        >
+          🎶 Play from Spotify
+        </button>
+      </div>
+
       <!-- Audio Controls -->
       <div class="space-y-4">
         <div class="flex items-center gap-4">
