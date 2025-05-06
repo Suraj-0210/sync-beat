@@ -228,7 +228,7 @@ export class RoomComponent implements OnInit {
 
   downloadAndSaveTrack(spotifyLink: string): void {
     this.http
-      .post<any>('http://localhost:3000/api/download', {
+      .post<any>('https://sync-beat.onrender.com/api/download', {
         song_name: 'Sync-Beat',
         artist_name: 'Hare Krishna',
         url: spotifyLink,
