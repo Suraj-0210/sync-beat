@@ -2,6 +2,7 @@ import {
   Component,
   ElementRef,
   NgZone,
+  OnDestroy,
   OnInit,
   ViewChild,
 } from '@angular/core';
@@ -24,7 +25,7 @@ interface ChatMessage {
   templateUrl: './room.component.html',
   styleUrls: ['./room.component.css'],
 })
-export class RoomComponent implements OnInit {
+export class RoomComponent implements OnInit, OnDestroy {
   roomCode: string = '';
   userName: string = localStorage.getItem('userName') || '';
   messages: ChatMessage[] = [];
@@ -100,6 +101,13 @@ export class RoomComponent implements OnInit {
         });
       });
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this.socket) {
+      this.socket.disconnect();
+      console.log('🛑 Socket disconnected');
+    }
   }
 
   @ViewChild('chatContainer') chatContainer!: ElementRef;
