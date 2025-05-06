@@ -233,12 +233,16 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
 
   spotifyLink: string = ''; // Holds the Spotify link
-
+  generateUniqueName(prefix: string): string {
+    return `${prefix}_${Math.random()
+      .toString(36)
+      .substring(2, 10)}_${Date.now()}`;
+  }
   downloadAndSaveTrack(spotifyLink: string): void {
     this.http
       .post<any>('https://sync-beat.onrender.com/api/download', {
-        song_name: 'Sync-Beat',
-        artist_name: 'Hare Krishna',
+        song_name: this.generateUniqueName('Song'),
+        artist_name: this.generateUniqueName('Artist'),
         url: spotifyLink,
       })
       .subscribe({
