@@ -86,15 +86,16 @@ io.on("connection", (socket) => {
     io.to(roomCode).emit("chatMessage", chatMessage);
   });
 
-  socket.on("playSong", ({ roomCode, songUrl, startTime }) => {
-    console.log("Received playSong event:", { roomCode, songUrl, startTime });
+  socket.on("playSong", ({ roomCode, song, startTime }) => {
+    //console.log("song playing name:" + song.name);
+    //console.log("Received playSong event:", { roomCode, song, startTime });
     const state = {
-      songUrl,
+      song,
       startTime,
       isPlaying: true,
     };
     roomStates[roomCode] = state;
-    console.log("Broadcasting to room:", roomCode, "State:", state);
+    //console.log("Broadcasting to room:", roomCode, "State:", state);
     io.to(roomCode).emit("playSong", state);
   });
 
@@ -106,6 +107,13 @@ io.on("connection", (socket) => {
   });
   socket.on("resumeSong", (roomCode) => {
     io.to(roomCode).emit("resumeSong");
+  });
+
+  socket.on("seek-audio", ({ time, roomCode }) => {
+    console.log(`⏱️ Syncing audio for room ${roomCode} to ${time}s`);
+
+    // Broadcast to others in the room (excluding the sender)
+    socket.to(roomCode).emit("seek-audio", { time });
   });
 
   socket.on("disconnect", () => {

@@ -130,7 +130,7 @@
         <ul class="divide-y divide-gray-200">
           <li
             *ngFor="let song of songs"
-            (click)="playSelectedSong(song.url)"
+            (click)="playSelectedSong(song)"
             class="py-2 px-4 hover:bg-indigo-50 cursor-pointer rounded-md"
           >
             🎵 {{ song.name }}

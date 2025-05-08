@@ -26,10 +26,12 @@ interface ChatMessage {
   styleUrls: ['./room.component.css'],
 })
 export class RoomComponent implements OnInit, OnDestroy {
+  backendUrl: string = 'http://localhost:3000';
   roomCode: string = '';
   userName: string = localStorage.getItem('userName') || '';
   messages: ChatMessage[] = [];
   newMessage: string = '';
+  currentSongIndex: number = 0;
 
   private socket: any;
   songUrl: string = ''; // Store the song URL to play it
@@ -56,7 +58,7 @@ export class RoomComponent implements OnInit, OnDestroy {
 
       // Retrieve the room code from the URL params
       this.roomCode = this.route.snapshot.paramMap.get('code')!;
-      this.socket = io('https://sync-beat.onrender.com');
+      this.socket = io(this.backendUrl);
       this.socket.emit('joinRoom', this.roomCode);
 
       // Listen for new chat messages
@@ -87,7 +89,11 @@ export class RoomComponent implements OnInit, OnDestroy {
       // Listen for the song to play
       this.socket.on(
         'playSong',
-        (data: { songUrl: string; startTime: number; isPlaying: boolean }) => {
+        (data: {
+          song: { name: string; url: string; idx: number };
+          startTime: number;
+          isPlaying: boolean;
+        }) => {
           this.ngZone.run(() => {
             this.playAudio(data);
           });
@@ -100,11 +106,23 @@ export class RoomComponent implements OnInit, OnDestroy {
           this.audioRef.nativeElement.pause();
         });
       });
+
+      this.socket.on('seek-audio', (data: { time: number }) => {
+        const { time } = data;
+        console.log(`🎯 Received sync time: ${time}`);
+        this.audioRef.nativeElement.currentTime = time;
+      });
+
+      this.audioRef.nativeElement.addEventListener('ended', () => {
+        console.log('the current song is finished playing');
+        this.ngZone.run(() => this.playNextSong());
+      });
     });
   }
 
   ngOnDestroy(): void {
     if (this.socket) {
+      this.pauseAudio();
       this.socket.disconnect();
       console.log('🛑 Socket disconnected');
     }
@@ -132,14 +150,26 @@ export class RoomComponent implements OnInit, OnDestroy {
     }
   }
 
-  playSelectedSong(songUrl: string) {
+  playSelectedSong(song: { name: string; url: string; idx: number }) {
+    this.currentSongIndex = song.idx;
     const startTime = Date.now(); // timestamp when song is played
     this.socket.emit('playSong', {
       roomCode: this.roomCode,
-      songUrl,
+      song,
       startTime,
     });
     console.log('SOng is emmited');
+  }
+
+  playNextSong() {
+    const nextIndex = this.currentSongIndex + 1;
+    if (nextIndex < this.songs.length) {
+      const nextSong = this.songs[nextIndex];
+      this.playSelectedSong(nextSong);
+    } else {
+      this.isPlaying = false;
+      this.showToast('Playlist finished!');
+    }
   }
 
   @ViewChild('audio') audioRef!: ElementRef<HTMLAudioElement>;
@@ -153,18 +183,22 @@ export class RoomComponent implements OnInit, OnDestroy {
     {
       name: 'Premalo',
       url: 'https://firebasestorage.googleapis.com/v0/b/mern-blog-4cc1b.appspot.com/o/Premalo%20-%20Anurag%20kulkarni%20-%20Ameera%20lyrical%20video%20%23lyricalsong%20-%20Naidu%20lyrics.mp3?alt=media&token=89813859-8c81-4dda-9a94-dde20b3650df',
+      idx: 0,
     },
     {
       name: 'Jhol',
       url: 'https://firebasestorage.googleapis.com/v0/b/mern-blog-4cc1b.appspot.com/o/Jhol.mp3?alt=media&token=4fa7677f-d10d-4bb6-9ad4-7457109ebbfa',
+      idx: 1,
     },
     {
       name: 'Sang Rahiyo',
       url: 'https://firebasestorage.googleapis.com/v0/b/mern-blog-4cc1b.appspot.com/o/Sang%20Rahiyo.mp3?alt=media&token=d6cbac9b-a822-4450-83a5-a71c2cdfe6a5',
+      idx: 2,
     },
     {
       name: 'Tere Naina',
       url: 'https://firebasestorage.googleapis.com/v0/b/mern-blog-4cc1b.appspot.com/o/Tere%20Naina.mp3?alt=media&token=843b06e9-59c4-4bf9-b397-9dfbf8cef29c',
+      idx: 3,
     },
   ];
 
@@ -180,10 +214,15 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.socket.emit('resumeSong', this.roomCode);
   }
 
-  playAudio(data: any) {
+  playAudio(data: {
+    song: { name: string; url: string; idx: number };
+    startTime: number;
+    isPlaying: boolean;
+  }) {
+    const { name, url, idx } = data.song;
     const audio = this.audioRef.nativeElement;
     console.log('🔊 Received playSong:', data);
-    this.songUrl = data.songUrl;
+    this.songUrl = url;
     const elapsed = (Date.now() - data.startTime) / 1000;
 
     // Set the audio source
@@ -198,7 +237,7 @@ export class RoomComponent implements OnInit, OnDestroy {
         .then(() => {
           console.log('✅ Playback started');
           this.isPlaying = true;
-          this.showToast('Playing Song');
+          this.showToast('Playing Song :' + name);
         })
         .catch((err) => {
           console.error('❌ Audio play error:', err);
@@ -230,6 +269,11 @@ export class RoomComponent implements OnInit, OnDestroy {
     const time = Number(input.value);
     this.audioRef.nativeElement.currentTime = time;
 
+    this.socket.emit('seek-audio', {
+      time,
+      roomCode: this.roomCode,
+    });
+
     // Temporary log
     console.log(`⏱️ User seeked to: ${time} seconds`);
   }
@@ -250,23 +294,23 @@ export class RoomComponent implements OnInit, OnDestroy {
       .toString(36)
       .substring(2, 10)}_${Date.now()}`;
   }
-  downloadAndSaveTrack(spotifyLink: string): void {
-    this.http
-      .post<any>('https://sync-beat.onrender.com/api/download', {
-        song_name: this.generateUniqueName('Song'),
-        artist_name: this.generateUniqueName('Artist'),
-        url: spotifyLink,
-      })
-      .subscribe({
-        next: (data) => {
-          this.songUrl = data.dlink;
-          this.playSelectedSong(this.songUrl);
-        },
-        error: (err) => {
-          console.error('HTTP error:', err);
-        },
-      });
-  }
+  // downloadAndSaveTrack(spotifyLink: string): void {
+  //   this.http
+  //     .post<any>(`${this.backendUrl}/api/download`, {
+  //       song_name: this.generateUniqueName('Song'),
+  //       artist_name: this.generateUniqueName('Artist'),
+  //       url: spotifyLink,
+  //     })
+  //     .subscribe({
+  //       next: (data) => {
+  //         this.songUrl = data.dlink;
+  //         this.playSelectedSong(this.songUrl);
+  //       },
+  //       error: (err) => {
+  //         console.error('HTTP error:', err);
+  //       },
+  //     });
+  // }
 
   constructor(
     private route: ActivatedRoute,
