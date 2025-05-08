@@ -26,7 +26,7 @@ interface ChatMessage {
   styleUrls: ['./room.component.css'],
 })
 export class RoomComponent implements OnInit, OnDestroy {
-  backendUrl: string = 'http://localhost:3000';
+  backendUrl: string = 'https://sync-beat.onrender.com';
   roomCode: string = '';
   userName: string = localStorage.getItem('userName') || '';
   messages: ChatMessage[] = [];
