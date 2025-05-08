@@ -154,6 +154,18 @@ export class RoomComponent implements OnInit, OnDestroy {
       name: 'Premalo',
       url: 'https://firebasestorage.googleapis.com/v0/b/mern-blog-4cc1b.appspot.com/o/Premalo%20-%20Anurag%20kulkarni%20-%20Ameera%20lyrical%20video%20%23lyricalsong%20-%20Naidu%20lyrics.mp3?alt=media&token=89813859-8c81-4dda-9a94-dde20b3650df',
     },
+    {
+      name: 'Jhol',
+      url: 'https://firebasestorage.googleapis.com/v0/b/mern-blog-4cc1b.appspot.com/o/Jhol.mp3?alt=media&token=4fa7677f-d10d-4bb6-9ad4-7457109ebbfa',
+    },
+    {
+      name: 'Sang Rahiyo',
+      url: 'https://firebasestorage.googleapis.com/v0/b/mern-blog-4cc1b.appspot.com/o/Sang%20Rahiyo.mp3?alt=media&token=d6cbac9b-a822-4450-83a5-a71c2cdfe6a5',
+    },
+    {
+      name: 'Tere Naina',
+      url: 'https://firebasestorage.googleapis.com/v0/b/mern-blog-4cc1b.appspot.com/o/Tere%20Naina.mp3?alt=media&token=843b06e9-59c4-4bf9-b397-9dfbf8cef29c',
+    },
   ];
 
   openMusicModal() {

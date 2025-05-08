@@ -6,6 +6,7 @@ import { SignupComponent } from './signup/signup.component';
 import { CreateRoomComponent } from './create-room/create-room.component';
 import { RoomComponent } from './room/room.component';
 import { AuthGuard } from './auth.guard';
+import { TestPlayComponent } from './test-play/test-play.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -17,6 +18,7 @@ const routes: Routes = [
   { path: 'room/:code', component: RoomComponent, canActivate: [AuthGuard] },
   { path: 'login', component: LoginComponent },
   { path: 'signup', component: SignupComponent },
+  { path: 'test-play', component: TestPlayComponent },
   {
     path: '**',
     redirectTo: '/create-room',

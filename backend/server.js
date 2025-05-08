@@ -131,7 +131,7 @@ app.post("/api/download", async (req, res) => {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
           Cookie:
-            "PHPSESSID=ca2428fc47cea60e60d528942b923a54; cf_token=3f53cd2816289943541a9d726e9c93fa; quality=128",
+            "PHPSESSID=468b75f4db48005d3650dcc34d599205; cf_token=3f53cd2816289943541a9d726e9c93fa; quality=128",
           Origin: "https://spotisongdownloader.to",
           Referer: "https://spotisongdownloader.to/track.php",
           "User-Agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5)",

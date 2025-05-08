@@ -14,6 +14,7 @@ import { AuthGuard } from './auth.guard';
 import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 import { firebaseConfig } from '../firebase';
+import { TestPlayComponent } from './test-play/test-play.component';
 
 @NgModule({
   declarations: [
@@ -23,6 +24,7 @@ import { firebaseConfig } from '../firebase';
     SignupComponent,
     CreateRoomComponent,
     RoomComponent,
+    TestPlayComponent,
   ],
   imports: [
     BrowserModule,
