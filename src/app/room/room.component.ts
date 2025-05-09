@@ -26,16 +26,26 @@ interface ChatMessage {
   styleUrls: ['./room.component.css'],
 })
 export class RoomComponent implements OnInit, OnDestroy {
-  backendUrl: string = 'https://sync-beat.onrender.com';
+  backendUrl: string = 'http://localhost:3000';
   roomCode: string = '';
   userName: string = localStorage.getItem('userName') || '';
+  uid: string = '';
   messages: ChatMessage[] = [];
   newMessage: string = '';
   currentSongIndex: number = 0;
 
   private socket: any;
-  songUrl: string = ''; // Store the song URL to play it
+  currentSong: { name: string; url: string; idx: number } | undefined; // Store the song URL to play it
   isPlaying: boolean = false; // Track whether the song is playing
+
+  togglePlayback() {
+    if (this.isPlaying) {
+      this.pauseAudio();
+    } else {
+      this.resumeSong();
+    }
+    this.isPlaying = !this.isPlaying;
+  }
 
   //private audioElement: HTMLAudioElement = new Audio(); // Audio element to control music
 
@@ -48,6 +58,14 @@ export class RoomComponent implements OnInit, OnDestroy {
     }, 3000); // Hide after 3 seconds
   }
 
+  roomUsers: { userName: string; uid: string }[] = [];
+  showFullUsernames = false;
+  selectedUserIndex: number | null = null;
+
+  toggleUsername(index: number) {
+    this.selectedUserIndex = this.selectedUserIndex === index ? null : index;
+  }
+
   ngOnInit(): void {
     this.afAuth.authState.subscribe((user) => {
       if (user) {
@@ -55,11 +73,40 @@ export class RoomComponent implements OnInit, OnDestroy {
       } else {
         this.userName = 'Anonymous';
       }
-
+      this.uid = crypto.randomUUID().toString();
       // Retrieve the room code from the URL params
       this.roomCode = this.route.snapshot.paramMap.get('code')!;
       this.socket = io(this.backendUrl);
-      this.socket.emit('joinRoom', this.roomCode);
+      this.socket.emit('joinRoom', {
+        roomCode: this.roomCode,
+        userName: this.userName,
+        uid: this.uid,
+      });
+
+      this.socket.on(
+        'roomUsers',
+        (users: { userName: string; uid: string }[]) => {
+          this.roomUsers = users;
+        }
+      );
+
+      this.socket.on('userJoined', (data: ChatMessage) => {
+        console.log(data.message); // e.g., "Alice has joined the room."
+        this.messages.push({
+          userName: 'Sync-Beat',
+          message: data.message,
+          time: data.time,
+        });
+      });
+
+      this.socket.on('userLeft', (data: ChatMessage) => {
+        console.log(data.message); // e.g., "Bob has left the room."
+        this.messages.push({
+          userName: 'Sync-Beat',
+          message: data.message,
+          time: data.time,
+        });
+      });
 
       // Listen for new chat messages
       this.socket.on('chatMessage', (message: ChatMessage) => {
@@ -122,7 +169,7 @@ export class RoomComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.socket) {
-      this.pauseAudio();
+      this.socket.emit('pauseSong', this.roomCode);
       this.socket.disconnect();
       console.log('🛑 Socket disconnected');
     }
@@ -220,13 +267,14 @@ export class RoomComponent implements OnInit, OnDestroy {
     isPlaying: boolean;
   }) {
     const { name, url, idx } = data.song;
+    this.currentSong = data.song;
     const audio = this.audioRef.nativeElement;
     console.log('🔊 Received playSong:', data);
-    this.songUrl = url;
+
     const elapsed = (Date.now() - data.startTime) / 1000;
 
     // Set the audio source
-    audio.src = this.songUrl;
+    audio.src = this.currentSong.url;
     audio.load(); // Reset state
     audio.currentTime = elapsed;
 

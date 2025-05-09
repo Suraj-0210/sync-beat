@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '../../firebase'; // Adjust the path based on your structure
 import { HttpClient } from '@angular/common/http';
@@ -10,7 +10,11 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./login.component.css'],
 })
 export class LoginComponent {
-  constructor(private router: Router, private http: HttpClient) {}
+  constructor(
+    private router: Router,
+    private http: HttpClient,
+    private route: ActivatedRoute
+  ) {}
 
   async handleGoogleClick() {
     const provider = new GoogleAuthProvider();
@@ -19,10 +23,8 @@ export class LoginComponent {
     try {
       const results = await signInWithPopup(auth, provider);
 
-      // User data
       const { displayName, email, photoURL } = results.user;
 
-      // Your own backend login/signup
       const res = await this.http
         .post<any>('https://sync-beat.onrender.com/api/auth/google', {
           name: displayName,
@@ -33,9 +35,15 @@ export class LoginComponent {
 
       document.cookie = `access_token=${res.access_token}; path=/;`;
 
-      this.router.navigate(['/create-room']);
-    } catch (err: any) {
-      console.error('Google login error:', err.message);
+      const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+
+      if (returnUrl) {
+        this.router.navigateByUrl(returnUrl); // goes to /room/49V3LR
+      } else {
+        this.router.navigate(['/create-room']);
+      }
+    } catch (error) {
+      console.error(error);
     }
   }
 }

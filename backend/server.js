@@ -57,12 +57,29 @@ let rooms = {};
 // Maintain state per room
 const roomStates = {};
 
-io.on("connection", (socket) => {
-  console.log("A user connected");
+const roomUsers = {};
 
-  socket.on("joinRoom", (roomCode) => {
+io.on("connection", (socket) => {
+  socket.on("joinRoom", ({ roomCode, userName, uid }) => {
     socket.join(roomCode);
-    console.log(`User joined room: ${roomCode}`);
+    socket.data.roomCode = roomCode;
+    socket.data.userName = userName;
+    socket.data.uid = uid;
+
+    console.log(`${userName} joined room: ${roomCode}`);
+
+    if (!roomUsers[roomCode]) roomUsers[roomCode] = [];
+    roomUsers[roomCode].push({ userName, uid });
+
+    // Notify *other* users in the room that a new user joined
+    socket.to(roomCode).emit("userJoined", {
+      uid,
+      userName,
+      message: `${userName} has joined the room.`,
+      time: new Date().toLocaleTimeString(),
+    });
+
+    io.to(roomCode).emit("roomUsers", roomUsers[roomCode]);
 
     if (rooms[roomCode]) {
       socket.emit("previousMessages", rooms[roomCode]);
@@ -117,7 +134,24 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("User disconnected");
+    const userName = socket.data.userName;
+    const uid = socket.data.uid;
+    const roomCode = socket.data.roomCode;
+    console.log(`❌ ${userName} disconnected from ${roomCode}`);
+
+    // Notify others in the room that this user left
+    if (roomCode && uid) {
+      socket.to(roomCode).emit("userLeft", {
+        userName,
+        message: `${userName} has left the room.`,
+        time: new Date().toLocaleTimeString(),
+      });
+    }
+
+    if (roomCode && roomUsers[roomCode]) {
+      roomUsers[roomCode] = roomUsers[roomCode].filter((u) => u.uid !== uid);
+      io.to(roomCode).emit("roomUsers", roomUsers[roomCode]);
+    }
   });
 });
 
