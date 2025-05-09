@@ -26,7 +26,7 @@ interface ChatMessage {
   styleUrls: ['./room.component.css'],
 })
 export class RoomComponent implements OnInit, OnDestroy {
-  backendUrl: string = 'https://sync-beat.onrender.com';
+  backendUrl: string = 'http://localhost:3000';
   roomCode: string = '';
   userName: string = localStorage.getItem('userName') || '';
   uid: string = '';
@@ -114,6 +114,13 @@ export class RoomComponent implements OnInit, OnDestroy {
           this.messages.push(message);
           setTimeout(() => this.scrollToBottom(), 100);
           this.showToast('New Message!');
+
+          this.showDesktopNotificationWithSound(
+            'New Message!',
+            'You have a new chat message.',
+            '/assets/chat-icon.png',
+            '/assets/sounds/notification.mp3'
+          );
         });
       });
 
@@ -359,6 +366,27 @@ export class RoomComponent implements OnInit, OnDestroy {
   //       },
   //     });
   // }
+
+  showDesktopNotificationWithSound(
+    title: string,
+    body: string,
+    iconPath: string,
+    soundPath: string
+  ) {
+    if (Notification.permission === 'granted') {
+      new Notification(title, { body, icon: iconPath });
+      const audio = new Audio(soundPath);
+      audio.play();
+    } else if (Notification.permission !== 'denied') {
+      Notification.requestPermission().then((permission) => {
+        if (permission === 'granted') {
+          new Notification(title, { body, icon: iconPath });
+          const audio = new Audio(soundPath);
+          audio.play();
+        }
+      });
+    }
+  }
 
   constructor(
     private route: ActivatedRoute,
