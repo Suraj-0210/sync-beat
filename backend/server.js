@@ -6,6 +6,8 @@ import mongoose from "mongoose";
 import authRoutes from "./routes/auth.route.js";
 import bodyParser from "body-parser";
 import axios from "axios";
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
@@ -18,9 +20,7 @@ const io = new Server(server, {
 });
 
 mongoose
-  .connect(
-    "mongodb+srv://kantaprustys:Suryakanta02%40@cluster01.i5mwj.mongodb.net/sync-beat?retryWrites=true&w=majority&appName=Cluster01"
-  )
+  .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("MongoDB connected");
   })
@@ -188,7 +188,9 @@ app.post("/api/download", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch download link" });
   }
 });
+// ✅ Correct:
+const PORT = process.env.PORT || 3000;
 
-server.listen(3000, () => {
+server.listen(PORT, () => {
   console.log("Server running on http://localhost:3000");
 });

@@ -41,5 +41,7 @@ testem.log
 .DS_Store
 Thumbs.db
 
+.env
+
 # # Environment files (optional, if they contain secrets)
 # src/environments/environment*.ts
