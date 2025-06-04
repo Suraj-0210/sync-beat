@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '../../firebase'; // Adjust the path based on your structure
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -26,7 +27,7 @@ export class LoginComponent {
       const { displayName, email, photoURL } = results.user;
 
       const res = await this.http
-        .post<any>('https://sync-beat.onrender.com/api/auth/google', {
+        .post<any>(`${environment.backendUrl}/api/auth/google`, {
           name: displayName,
           email,
           googlePhotoUrl: photoURL,
