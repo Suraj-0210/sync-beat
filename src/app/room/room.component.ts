@@ -13,6 +13,8 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 import axios from 'axios';
 import qs from 'qs';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { ChatService } from '../service/chat.service';
+import { environment } from '../../environments/environment';
 
 interface ChatMessage {
   userName: string;
@@ -26,17 +28,28 @@ interface ChatMessage {
   styleUrls: ['./room.component.css'],
 })
 export class RoomComponent implements OnInit, OnDestroy {
-  backendUrl: string = 'https://sync-beat.onrender.com';
+  backendUrl: string = environment.backendUrl;
   roomCode: string = '';
   userName: string = localStorage.getItem('userName') || '';
   uid: string = '';
   messages: ChatMessage[] = [];
   newMessage: string = '';
   currentSongIndex: number = 0;
+  roomUsers: { userName: string; uid: string }[] = [];
+  showFullUsernames = false;
+  selectedUserIndex: number | null = null;
 
   private socket: any;
-  currentSong: { name: string; url: string; idx: number } | undefined; // Store the song URL to play it
-  isPlaying: boolean = false; // Track whether the song is playing
+  currentSong: { name: string; url: string; idx: number } | undefined;
+  isPlaying: boolean = false;
+
+  toastMessage: string | null = null;
+
+  @ViewChild('audio') audioRef!: ElementRef<HTMLAudioElement>;
+
+  showMusicModal = false;
+  currentTime: number = 0;
+  audioDuration: number = 0;
 
   togglePlayback() {
     if (this.isPlaying) {
@@ -49,18 +62,12 @@ export class RoomComponent implements OnInit, OnDestroy {
 
   //private audioElement: HTMLAudioElement = new Audio(); // Audio element to control music
 
-  toastMessage: string | null = null;
-
   showToast(message: string) {
     this.toastMessage = message;
     setTimeout(() => {
       this.toastMessage = null;
     }, 3000); // Hide after 3 seconds
   }
-
-  roomUsers: { userName: string; uid: string }[] = [];
-  showFullUsernames = false;
-  selectedUserIndex: number | null = null;
 
   toggleUsername(index: number) {
     this.selectedUserIndex = this.selectedUserIndex === index ? null : index;
@@ -226,12 +233,6 @@ export class RoomComponent implements OnInit, OnDestroy {
     }
   }
 
-  @ViewChild('audio') audioRef!: ElementRef<HTMLAudioElement>;
-
-  showMusicModal = false;
-  currentTime: number = 0;
-  audioDuration: number = 0;
-
   // Sample songs
   songs = [
     {
@@ -343,12 +344,12 @@ export class RoomComponent implements OnInit, OnDestroy {
     return `${min}:${sec}`;
   }
 
-  spotifyLink: string = ''; // Holds the Spotify link
-  generateUniqueName(prefix: string): string {
-    return `${prefix}_${Math.random()
-      .toString(36)
-      .substring(2, 10)}_${Date.now()}`;
-  }
+  // spotifyLink: string = ''; // Holds the Spotify link
+  // generateUniqueName(prefix: string): string {
+  //   return `${prefix}_${Math.random()
+  //     .toString(36)
+  //     .substring(2, 10)}_${Date.now()}`;
+  // }
   // downloadAndSaveTrack(spotifyLink: string): void {
   //   this.http
   //     .post<any>(`${this.backendUrl}/api/download`, {
@@ -389,6 +390,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
 
   constructor(
+    private chat: ChatService,
     private route: ActivatedRoute,
     private ngZone: NgZone,
     private afAuth: AngularFireAuth,

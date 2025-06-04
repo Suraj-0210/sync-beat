@@ -18,8 +18,17 @@ export class ChatService {
   }
 
   // Send a chat message
-  sendMessage(roomCode: string, message: string) {
-    this.socket.emit('chatMessage', { roomCode, message });
+
+  sendMessage(newMessage: string, roomCode: string, userName: string) {
+    if (newMessage.trim()) {
+      const messageData = {
+        roomCode: roomCode,
+        userName: userName,
+        message: newMessage,
+        time: new Date().toLocaleTimeString(),
+      };
+      this.socket.emit('chatMessage', messageData);
+    }
   }
 
   // Listen for incoming messages
