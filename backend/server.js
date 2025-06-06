@@ -66,7 +66,7 @@ io.on("connection", (socket) => {
     socket.data.userName = userName;
     socket.data.uid = uid;
 
-    console.log(`${userName} joined room: ${roomCode}`);
+    //console.log(`${userName} joined room: ${roomCode}`);
 
     if (!roomUsers[roomCode]) roomUsers[roomCode] = [];
     roomUsers[roomCode].push({ userName, uid });
@@ -91,7 +91,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("chatMessage", ({ roomCode, message, userName, time }) => {
-    console.log("Message Received");
+    //console.log("Message Received");
     if (!rooms[roomCode]) rooms[roomCode] = [];
 
     const chatMessage = {
@@ -137,20 +137,33 @@ io.on("connection", (socket) => {
     const userName = socket.data.userName;
     const uid = socket.data.uid;
     const roomCode = socket.data.roomCode;
-    console.log(`❌ ${userName} disconnected from ${roomCode}`);
 
-    // Notify others in the room that this user left
+    // console.log(`❌ ${userName} disconnected from ${roomCode}`);
+
     if (roomCode && uid) {
+      // Notify others in the room
       socket.to(roomCode).emit("userLeft", {
         userName,
         message: `${userName} has left the room.`,
         time: new Date().toLocaleTimeString(),
       });
-    }
 
-    if (roomCode && roomUsers[roomCode]) {
-      roomUsers[roomCode] = roomUsers[roomCode].filter((u) => u.uid !== uid);
-      io.to(roomCode).emit("roomUsers", roomUsers[roomCode]);
+      // Remove user from room
+      if (roomUsers[roomCode]) {
+        roomUsers[roomCode] = roomUsers[roomCode].filter((u) => u.uid !== uid);
+
+        // Broadcast updated user list
+        io.to(roomCode).emit("roomUsers", roomUsers[roomCode]);
+
+        // ✅ Check if room is now empty
+        if (roomUsers[roomCode].length === 0) {
+          //console.log(`🧹 Cleaning up empty room: ${roomCode}`);
+
+          delete roomUsers[roomCode];
+          delete roomStates[roomCode];
+          delete rooms[roomCode];
+        }
+      }
     }
   });
 });
