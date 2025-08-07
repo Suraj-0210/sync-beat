@@ -6,6 +6,7 @@ import { SignupComponent } from './signup/signup.component';
 import { CreateRoomComponent } from './create-room/create-room.component';
 import { RoomComponent } from './room/room.component';
 import { AuthGuard } from './auth.guard';
+import { NoAuthGuard } from './no-auth.guard';
 import { TestPlayComponent } from './test-play/test-play.component';
 
 const routes: Routes = [
@@ -16,7 +17,7 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   { path: 'room/:code', component: RoomComponent, canActivate: [AuthGuard] },
-  { path: 'login', component: LoginComponent },
+  { path: 'login', component: LoginComponent, canActivate: [NoAuthGuard] },
   { path: 'signup', component: SignupComponent },
   { path: 'test-play', component: TestPlayComponent },
   {
@@ -25,6 +26,7 @@ const routes: Routes = [
     pathMatch: 'full',
   },
 ];
+
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],

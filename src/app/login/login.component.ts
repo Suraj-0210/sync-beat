@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { auth } from '../../firebase'; // Adjust the path based on your structure
-import { HttpClient } from '@angular/common/http';
+import { auth } from '../../firebase';
 import { environment } from '../../environments/environment';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
@@ -11,10 +12,14 @@ import { environment } from '../../environments/environment';
   styleUrls: ['./login.component.css'],
 })
 export class LoginComponent {
+  errorMessage: string = '';
+  isLoading: boolean = false;
+
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
+    private authService: AuthService,
     private http: HttpClient,
-    private route: ActivatedRoute
   ) {}
 
   async handleGoogleClick() {

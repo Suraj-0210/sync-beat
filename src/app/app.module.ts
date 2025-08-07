@@ -10,10 +10,12 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RoomComponent } from './room/room.component';
 import { AuthGuard } from './auth.guard';
+import { NoAuthGuard } from './no-auth.guard';
 import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 import { firebaseConfig } from '../firebase';
 import { TestPlayComponent } from './test-play/test-play.component';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
   declarations: [
@@ -29,11 +31,12 @@ import { TestPlayComponent } from './test-play/test-play.component';
     BrowserModule,
     FormsModule,
     AppRoutingModule,
+    RouterModule,
+    HttpClientModule,
     AngularFireModule.initializeApp(firebaseConfig),
     AngularFireAuthModule,
-    HttpClientModule,
   ],
-  providers: [AuthGuard],
+  providers: [AuthGuard, NoAuthGuard],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

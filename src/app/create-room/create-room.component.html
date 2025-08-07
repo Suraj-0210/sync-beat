@@ -1,52 +1,88 @@
-<div class="max-w-lg mx-auto p-6 bg-white shadow-md rounded-lg">
-  <h2 class="text-2xl font-semibold text-center mb-4">Create Room</h2>
+<!-- Main Container -->
+<div class="min-h-screen relative overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center px-4 py-10">
+  <!-- Animated Background -->
+  <div class="absolute inset-0">
+    <!-- Animated circles -->
+    <div class="absolute top-0 left-0 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+    <div class="absolute top-0 right-0 w-72 h-72 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+    <div class="absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+  </div>
 
-  <!-- Form to create a room -->
-  <form (ngSubmit)="createRoom()" class="space-y-4">
-    <div class="flex flex-col">
-      <label for="roomName" class="text-lg font-medium">Room Name</label>
-      <input
-        type="text"
-        id="roomName"
-        [(ngModel)]="roomName"
-        name="roomName"
-        class="border border-gray-300 p-2 rounded-lg"
-        placeholder="Enter room name"
-        required
-      />
+  <!-- Content Container -->
+  <div class="relative z-10 w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8">
+    <!-- Create Room Card -->
+    <div class="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-8 transform hover:scale-105 transition-all duration-300">
+      <div class="text-center mb-8">
+        <div class="text-4xl mb-4">🎵</div>
+        <h2 class="text-2xl font-bold text-white mb-2">Create New Room</h2>
+        <p class="text-white/80">Start a new music session with friends</p>
+      </div>
+
+      <form (ngSubmit)="createRoom()" class="space-y-6">
+        <div class="space-y-2">
+          <label for="roomName" class="block text-white/90 text-sm font-medium">Room Name</label>
+          <input
+            type="text"
+            id="roomName"
+            [(ngModel)]="roomName"
+            name="roomName"
+            class="w-full px-4 py-3 bg-white/20 border border-white/10 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 backdrop-blur-sm"
+            placeholder="Enter a cool room name"
+            required
+          />
+        </div>
+
+        <button
+          type="submit"
+          class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 px-6 rounded-xl transform transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center justify-center space-x-2"
+        >
+          <span>Create Room</span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+        </button>
+      </form>
     </div>
 
-    <button
-      type="submit"
-      class="w-full bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition duration-200"
-    >
-      Create Room
-    </button>
-  </form>
+    <!-- Join Room Card -->
+    <div class="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-8 transform hover:scale-105 transition-all duration-300">
+      <div class="text-center mb-8">
+        <div class="text-4xl mb-4">🎧</div>
+        <h2 class="text-2xl font-bold text-white mb-2">Join Existing Room</h2>
+        <p class="text-white/80">Enter a room code to join friends</p>
+      </div>
 
-  <hr class="my-6" />
+      <form (ngSubmit)="goToRoom()" class="space-y-6">
+        <div class="space-y-2">
+          <label for="roomCode" class="block text-white/90 text-sm font-medium">Room Code</label>
+          <input
+            type="text"
+            id="roomCode"
+            [(ngModel)]="roomCode"
+            name="roomCode"
+            class="w-full px-4 py-3 bg-white/20 border border-white/10 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 backdrop-blur-sm uppercase"
+            placeholder="Enter room code"
+            required
+          />
+        </div>
 
-  <!-- Form to go to an existing room -->
-  <h3 class="text-xl font-semibold text-center mb-4">Go to Room</h3>
-  <form (ngSubmit)="goToRoom()" class="space-y-4">
-    <div class="flex flex-col">
-      <label for="roomCode" class="text-lg font-medium">Room Code</label>
-      <input
-        type="text"
-        id="roomCode"
-        [(ngModel)]="roomCode"
-        name="roomCode"
-        class="border border-gray-300 p-2 rounded-lg"
-        placeholder="Enter room code"
-        required
-      />
+        <button
+          type="submit"
+          class="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold py-3 px-6 rounded-xl transform transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center justify-center space-x-2"
+        >
+          <span>Join Room</span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+          </svg>
+        </button>
+      </form>
     </div>
+  </div>
 
-    <button
-      type="submit"
-      class="w-full bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 transition duration-200"
-    >
-      Go to Room
-    </button>
-  </form>
+  <!-- Quick Tips -->
+  <div class="absolute bottom-4 left-0 right-0 text-center">
+    <p class="text-white/60 text-sm">
+      Tip: Share the room code with friends to sync music together ✨
+    </p>
+  </div>
 </div>

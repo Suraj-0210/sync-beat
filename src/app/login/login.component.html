@@ -1,50 +1,89 @@
-<div
-  class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 px-4 py-10"
->
-  <div
-    class="bg-white rounded-3xl shadow-2xl p-8 sm:p-10 max-w-md w-full text-center"
-  >
-    <!-- Logo -->
-    <img
-      src="https://cdn-icons-png.flaticon.com/512/727/727218.png"
-      alt="Music Icon"
-      class="w-16 h-16 mx-auto mb-4 animate-pulse"
-    />
+<!-- Main Container -->
+<div class="min-h-screen relative overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center px-4 py-10">
+  <!-- Animated Background -->
+  <div class="absolute inset-0">
+    <!-- Animated circles -->
+    <div class="absolute top-0 left-0 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+    <div class="absolute top-0 right-0 w-72 h-72 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+    <div class="absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+  </div>
 
-    <!-- App Info -->
-    <h2 class="text-2xl sm:text-3xl font-extrabold text-purple-700 mb-3">
-      Login to SyncBeats
-    </h2>
-    <p class="text-gray-600 text-sm sm:text-base mb-6 px-2">
-      This app uses your <strong>Google Drive</strong> to store and play your
-      music. Connect with friends and vibe together — all in sync 🎧💜
-    </p>
+  <!-- Login Card -->
+  <div class="relative z-10 w-full max-w-md transform hover:scale-105 transition-all duration-300">
+    <!-- Glass Effect Card -->
+    <div class="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-8 sm:p-10">
+      <!-- Logo Container with Glow -->
+      <div class="relative w-24 h-24 mx-auto mb-8">
+        <div class="absolute inset-0 bg-white rounded-full blur-md"></div>
+        <img
+          src="https://cdn-icons-png.flaticon.com/512/727/727218.png"
+          alt="SyncBeats Logo"
+          class="relative z-10 w-full h-full animate-pulse"
+        />
+      </div>
 
-    <!-- Google Login -->
-    <!-- Google Login -->
-    <button
-      class="w-full bg-red-500 hover:bg-red-600 transition-all text-white font-bold py-3 px-6 rounded-full flex items-center justify-center gap-3 text-sm sm:text-base shadow-md"
-      (click)="handleGoogleClick()"
-    >
-      <img
-        src="https://cdn-icons-png.flaticon.com/512/281/281764.png"
-        alt="Google Icon"
-        class="w-5 h-5"
-      />
-      Sign in with Google
-    </button>
+      <!-- Title with Gradient -->
+      <h2 class="text-3xl sm:text-4xl font-black text-center mb-6">
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+          Welcome to SyncBeats
+        </span>
+      </h2>
 
-    <!-- Logout Button -->
-    <!-- <button
-      class="w-full bg-gray-700 hover:bg-gray-800 transition-all text-white font-bold py-3 px-6 rounded-full flex items-center justify-center gap-3 text-sm sm:text-base shadow-md mt-4"
-      (click)="handleLogout()"
-    >
-      Logout ({{ userName }})
-    </button> -->
+      <!-- Description -->
+      <p class="text-white/80 text-center mb-8 leading-relaxed">
+        Connect with your Google account to start syncing beats with friends 🎵✨
+      </p>
 
-    <!-- Optional Sign-up Notice -->
-    <p class="text-gray-500 text-sm mt-6">
-      Don’t have an account? Just hit Google — we’ll take care of the rest 🤝
-    </p>
+      <!-- Error Message -->
+      <div *ngIf="errorMessage" class="mb-6 p-4 bg-red-500/20 backdrop-blur-sm rounded-xl text-white text-center">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Google Sign In Button -->
+      <button
+        (click)="handleGoogleClick()"
+        [disabled]="isLoading"
+        class="group w-full bg-white hover:bg-gray-50 text-gray-800 font-bold py-4 px-6 rounded-2xl flex items-center justify-center space-x-3 transform transition-all duration-300 hover:scale-105 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <!-- Loading Spinner -->
+        <div *ngIf="isLoading" class="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-800"></div>
+        
+        <!-- Google Icon -->
+        <img
+          *ngIf="!isLoading"
+          src="https://cdn-icons-png.flaticon.com/512/281/281764.png"
+          alt="Google Icon"
+          class="w-6 h-6"
+        />
+        <span class="text-lg">{{ isLoading ? 'Signing in...' : 'Sign in with Google' }}</span>
+      </button>
+
+      <!-- Features List -->
+      <div class="mt-10 space-y-4">
+        <div class="flex items-center text-white/80">
+          <svg class="w-5 h-5 mr-3 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          <span>Sync music with friends in real-time</span>
+        </div>
+        <div class="flex items-center text-white/80">
+          <svg class="w-5 h-5 mr-3 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          <span>Access your Google Drive music library</span>
+        </div>
+        <div class="flex items-center text-white/80">
+          <svg class="w-5 h-5 mr-3 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          <span>Create private listening rooms</span>
+        </div>
+      </div>
+
+      <!-- Privacy Notice -->
+      <p class="text-white/60 text-sm text-center mt-8">
+        By continuing, you agree to our Terms of Service and Privacy Policy
+      </p>
+    </div>
   </div>
 </div>

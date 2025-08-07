@@ -6,15 +6,13 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { io } from 'socket.io-client';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
-
-import axios from 'axios';
-import qs from 'qs';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { ChatService } from '../service/chat.service';
 import { environment } from '../../environments/environment';
+import { AuthService } from '../services/auth.service';
 
 interface ChatMessage {
   userName: string;
@@ -38,24 +36,40 @@ export class RoomComponent implements OnInit, OnDestroy {
   roomUsers: { userName: string; uid: string }[] = [];
   showFullUsernames = false;
   selectedUserIndex: number | null = null;
+  showCopiedMessage = false;
 
   private socket: any;
   currentSong: { name: string; url: string; idx: number } | undefined;
+  currentVideo: { name: string; url: string; idx: number } | undefined;
   isPlaying: boolean = false;
+  isVideoMode: boolean = false;
+  isSomeoneTyping: boolean = false;
+  private typingTimer: any;
 
   toastMessage: string | null = null;
 
   @ViewChild('audio') audioRef!: ElementRef<HTMLAudioElement>;
+  @ViewChild('video') videoRef!: ElementRef<HTMLVideoElement>;
 
   showMusicModal = false;
+  showVideoModal = false;
   currentTime: number = 0;
   audioDuration: number = 0;
+  videoDuration: number = 0;
 
   togglePlayback() {
-    if (this.isPlaying) {
-      this.pauseAudio();
+    if (this.isVideoMode) {
+      if (this.isPlaying) {
+        this.pauseVideo();
+      } else {
+        this.resumeVideo();
+      }
     } else {
-      this.resumeSong();
+      if (this.isPlaying) {
+        this.pauseAudio();
+      } else {
+        this.resumeSong();
+      }
     }
     this.isPlaying = !this.isPlaying;
   }
@@ -138,6 +152,13 @@ export class RoomComponent implements OnInit, OnDestroy {
         }
       });
 
+      this.socket.on('resumeVideo', () => {
+        const video = this.videoRef.nativeElement;
+        if (video.src) {
+          video.play();
+        }
+      });
+
       // Listen for previous messages when a new user joins
       this.socket.on('previousMessages', (messages: ChatMessage[]) => {
         this.ngZone.run(() => {
@@ -156,7 +177,23 @@ export class RoomComponent implements OnInit, OnDestroy {
           isPlaying: boolean;
         }) => {
           this.ngZone.run(() => {
+            this.isVideoMode = false;
             this.playAudio(data);
+          });
+        }
+      );
+
+      // Listen for video to play
+      this.socket.on(
+        'playVideo',
+        (data: {
+          video: { name: string; url: string; idx: number };
+          startTime: number;
+          isPlaying: boolean;
+        }) => {
+          this.ngZone.run(() => {
+            this.isVideoMode = true;
+            this.playVideo(data);
           });
         }
       );
@@ -168,10 +205,23 @@ export class RoomComponent implements OnInit, OnDestroy {
         });
       });
 
+      // Listen for video pause
+      this.socket.on('pauseVideo', () => {
+        this.ngZone.run(() => {
+          this.videoRef.nativeElement.pause();
+        });
+      });
+
       this.socket.on('seek-audio', (data: { time: number }) => {
         const { time } = data;
         console.log(`🎯 Received sync time: ${time}`);
         this.audioRef.nativeElement.currentTime = time;
+      });
+
+      this.socket.on('seek-video', (data: { time: number }) => {
+        const { time } = data;
+        console.log(`🎯 Received video sync time: ${time}`);
+        this.videoRef.nativeElement.currentTime = time;
       });
 
       this.audioRef.nativeElement.addEventListener('ended', () => {
@@ -198,6 +248,22 @@ export class RoomComponent implements OnInit, OnDestroy {
       console.error('Scroll failed:', err);
     }
   }
+
+  onTyping() {
+    // Clear any existing timer
+    if (this.typingTimer) {
+      clearTimeout(this.typingTimer);
+    }
+
+    // Set typing indicator
+    this.isSomeoneTyping = true;
+
+    // Set timer to clear typing indicator after 1 second of inactivity
+    this.typingTimer = setTimeout(() => {
+      this.isSomeoneTyping = false;
+    }, 1000);
+  }
+
   sendMessage() {
     if (this.newMessage.trim()) {
       const messageData = {
@@ -208,6 +274,12 @@ export class RoomComponent implements OnInit, OnDestroy {
       };
       this.socket.emit('chatMessage', messageData);
       this.newMessage = '';
+
+      // Clear typing indicator
+      this.isSomeoneTyping = false;
+      if (this.typingTimer) {
+        clearTimeout(this.typingTimer);
+      }
     }
   }
 
@@ -219,7 +291,28 @@ export class RoomComponent implements OnInit, OnDestroy {
       song,
       startTime,
     });
-    console.log('SOng is emmited');
+    console.log('Song is emitted');
+  }
+
+  playSelectedVideo(video: { name: string; url: string; idx: number }) {
+    this.currentSongIndex = video.idx;
+    const startTime = Date.now(); // timestamp when video is played
+    this.socket.emit('playVideo', {
+      roomCode: this.roomCode,
+      video,
+      startTime,
+    });
+    console.log('Video is emitted');
+  }
+
+  playPreviousSong() {
+    const previousIndex = this.currentSongIndex - 1;
+    if (previousIndex >= 0) {
+      const previousSong = this.songs[previousIndex];
+      this.playSelectedSong(previousSong);
+    } else {
+      this.showToast('This is the first song!');
+    }
   }
 
   playNextSong() {
@@ -257,6 +350,20 @@ export class RoomComponent implements OnInit, OnDestroy {
     },
   ];
 
+  // Sample videos
+  videos = [
+    {
+      name: 'Sample Video 1',
+      url: 'https://firebasestorage.googleapis.com/v0/b/mern-blog-4cc1b.appspot.com/o/Bubble%20_%20No-code%20apps%20-%20Brave%202023-11-29%2009-22-59.mp4?alt=media&token=1047345a-f6b9-4086-8e41-dca84627df4c',
+      idx: 0,
+    },
+    {
+      name: 'Sample Video 2',
+      url: 'https://firebasestorage.googleapis.com/v0/b/mern-blog-4cc1b.appspot.com/o/Bubble%20_%20No-code%20apps%20-%20Brave%202023-11-29%2009-22-59.mp4?alt=media&token=1047345a-f6b9-4086-8e41-dca84627df4c',
+      idx: 1,
+    },
+  ];
+
   openMusicModal() {
     this.showMusicModal = true;
   }
@@ -265,8 +372,24 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.showMusicModal = false;
   }
 
+  openVideoModal() {
+    this.showVideoModal = true;
+  }
+
+  closeVideoModal() {
+    this.showVideoModal = false;
+  }
+
   resumeSong() {
     this.socket.emit('resumeSong', this.roomCode);
+  }
+
+  resumeVideo() {
+    this.socket.emit('resumeVideo', this.roomCode);
+  }
+
+  pauseVideo() {
+    this.socket.emit('pauseVideo', this.roomCode);
   }
 
   playAudio(data: {
@@ -314,24 +437,75 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.socket.emit('pauseSong', this.roomCode);
   }
 
+  playVideo(data: {
+    video: { name: string; url: string; idx: number };
+    startTime: number;
+    isPlaying: boolean;
+  }) {
+    const { name, url, idx } = data.video;
+    this.currentVideo = data.video;
+    const video = this.videoRef.nativeElement;
+    console.log('🎬 Received playVideo:', data);
+
+    const elapsed = (Date.now() - data.startTime) / 1000;
+
+    // Set the video source
+    video.src = this.currentVideo.url;
+    video.load(); // Reset state
+    video.currentTime = elapsed;
+
+    // Wait for a user interaction once before allowing playback
+    const tryPlay = () => {
+      video
+        .play()
+        .then(() => {
+          console.log('✅ Video playback started');
+          this.isPlaying = true;
+          this.showToast('Playing Video: ' + name);
+        })
+        .catch((err) => {
+          console.error('❌ Video play error:', err);
+        });
+    };
+
+    if (video.paused) {
+      setTimeout(() => {
+        tryPlay();
+      }, 1000); // 1000 ms = 1 second
+    }
+  }
+
   onTimeUpdate(event: Event) {
-    const audio = this.audioRef.nativeElement;
-    this.currentTime = audio.currentTime;
-    this.audioDuration = audio.duration;
+    if (this.isVideoMode) {
+      const video = this.videoRef.nativeElement;
+      this.currentTime = video.currentTime;
+      this.videoDuration = video.duration;
+    } else {
+      const audio = this.audioRef.nativeElement;
+      this.currentTime = audio.currentTime;
+      this.audioDuration = audio.duration;
+    }
   }
 
   seekAudio(event: Event) {
     const input = event.target as HTMLInputElement;
     const time = Number(input.value);
-    this.audioRef.nativeElement.currentTime = time;
 
-    this.socket.emit('seek-audio', {
-      time,
-      roomCode: this.roomCode,
-    });
-
-    // Temporary log
-    console.log(`⏱️ User seeked to: ${time} seconds`);
+    if (this.isVideoMode) {
+      this.videoRef.nativeElement.currentTime = time;
+      this.socket.emit('seek-video', {
+        time,
+        roomCode: this.roomCode,
+      });
+      console.log(`⏱️ User seeked video to: ${time} seconds`);
+    } else {
+      this.audioRef.nativeElement.currentTime = time;
+      this.socket.emit('seek-audio', {
+        time,
+        roomCode: this.roomCode,
+      });
+      console.log(`⏱️ User seeked audio to: ${time} seconds`);
+    }
   }
 
   formatTime(seconds: number): string {
@@ -392,8 +566,43 @@ export class RoomComponent implements OnInit, OnDestroy {
   constructor(
     private chat: ChatService,
     private route: ActivatedRoute,
+    private router: Router,
     private ngZone: NgZone,
     private afAuth: AngularFireAuth,
-    private http: HttpClient
+    private http: HttpClient,
+    private authService: AuthService
   ) {}
+
+  async handleLogout() {
+    try {
+      // Leave the room before logging out
+      if (this.socket) {
+        this.socket.disconnect();
+      }
+      await this.authService.signOut();
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  }
+
+  async shareRoom() {
+    try {
+      const roomUrl = `${window.location.origin}/room/${this.roomCode}`;
+      await navigator.clipboard.writeText(roomUrl);
+
+      // Show success message
+      this.showCopiedMessage = true;
+
+      // Hide message after 2 seconds
+      setTimeout(() => {
+        this.showCopiedMessage = false;
+      }, 2000);
+
+      // Show toast
+      this.showToast('Room link copied to clipboard! 🎉');
+    } catch (error) {
+      console.error('Failed to copy room link:', error);
+      this.showToast('Failed to copy room link. Please try again.');
+    }
+  }
 }
