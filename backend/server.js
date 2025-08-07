@@ -63,14 +63,6 @@ const downloadLimiter = rateLimit({
 // Error handling middleware
 app.use(errorHandler);
 
-// Handle unhandled routes
-app.all("*", (req, res, next) => {
-  res.status(404).json({
-    status: "error",
-    message: `Can't find ${req.originalUrl} on this server!`,
-  });
-});
-
 // Start server
 const PORT = config.server.port;
 server.listen(PORT, () => {
